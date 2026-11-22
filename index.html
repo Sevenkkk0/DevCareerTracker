@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dev Career Tracker</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/adaptive.css">
+
+</head>
+<body>
+
+<header class="app-header">
+    <div class="header-inner">
+        <div class="header-left">
+            <div class="logo">💻 Dev Career Tracker</div>
+            <div class="role-tabs" id="role-tabs">
+                <button class="role-tab active" data-role="frontend">Frontend</button>
+                <button class="role-tab" data-role="backend">Backend <span class="wip-tag">скоро</span></button>
+                <button class="role-tab" data-role="design">Design <span class="wip-tag">скоро</span></button>
+            </div>
+        </div>
+
+        <div class="header-actions">
+            <button class="btn-header" id="open-tasks-btn">📝 Задачи (<span id="tasks-count">0</span>)</button>
+            <button class="btn-header" id="open-roadmap-btn">🗺️ Roadmap</button>
+            <button class="btn-header" id="export-btn" title="Скачать файл с прогрессом">💾 Бэкап</button>
+            <label class="btn-header" title="Загрузить прогресс из файла">
+                📂 Загрузить
+                <input type="file" id="import-input" accept=".json" hidden>
+            </label>
+            <button class="btn-reset" id="reset-btn">Сброс</button>
+        </div>
+    </div>
+</header>
+
+<main class="container">
+    <section id="welcome-screen" class="welcome-box hidden">
+        <div class="card welcome-card">
+            <div class="welcome-badge">💻 Трекер карьеры и дохода разработчика</div>
+            <h1 class="welcome-title">Добро пожаловать в Dev Career Tracker</h1>
+            <p class="welcome-desc">
+                Это ваш личный рабочий центр для роста в разработке: ведите учёт коммерческих и учебных часов по таймеру, фиксируйте доход по месяцам, прокачивайте навыки по Roadmap, закрывайте задачи и повышайте свой грейд от <strong>Trainee</strong> до <strong>Senior</strong>.
+            </p>
+
+            <div class="welcome-features">
+                <div class="welcome-feat-item">
+                    <strong>⏱ Таймер и ставка</strong>
+                    <span>Раздельный учёт коммерции и учёбы, расчёт реальной ставки ₽/ч</span>
+                </div>
+                <div class="welcome-feat-item">
+                    <strong>🎓 Грейды и экзамены</strong>
+                    <span>Прозрачные условия роста до Junior, Middle и Senior с проверкой знаний</span>
+                </div>
+                <div class="welcome-feat-item">
+                    <strong>🗺️ Roadmap и задачи</strong>
+                    <span>Интерактивная карта навыков, планировщик с подзадачами и 32 ачивки</span>
+                </div>
+            </div>
+
+            <div class="welcome-actions">
+                <button class="btn-welcome-primary" id="welcome-start-quiz-btn">
+                    🎯 Пройти стартовый квиз
+                    <span>20 вопросов — определим ваш текущий грейд и перенесём опыт</span>
+                </button>
+                <button class="btn-welcome-secondary" id="welcome-start-zero-btn">
+                    🚀 Начать с нуля (Trainee)
+                    <span>Сразу открыть трекер с базового уровня без тестирования</span>
+                </button>
+            </div>
+            <div class="storage-notice">
+                💡 <strong>Важно:</strong> все данные хранятся локально в памяти вашего браузера. Не забывайте периодически нажимать <strong>«💾 Бэкап»</strong> в шапке сайта, чтобы не потерять прогресс при очистке кэша или смене устройства.
+            </div>
+        </div>
+    </section>
+
+    <section id="wip-screen" class="wip-box hidden">
+        <div class="card wip-card">
+            <div class="wip-icon">🚧</div>
+            <h2 id="wip-title">Направление в разработке</h2>
+            <p class="wip-desc">Модуль с тестами, грейдами и картой навыков для этого направления сейчас находится в разработке. Весь ваш прогресс во вкладке Frontend сохранен.</p>
+            <button class="btn-add" id="back-to-frontend-btn">← Вернуться во Frontend</button>
+        </div>
+    </section>
+
+    <section id="quiz-screen" class="hidden">
+        <h2 id="quiz-title" class="quiz-main-title">🎓 Экзамен</h2>
+        <p id="quiz-sub" class="quiz-sub">Ответьте на вопросы.</p>
+        <div class="card">
+            <div class="label" id="quiz-progress"></div>
+            <div id="quiz-question" class="quiz-q-text"></div>
+            <div id="quiz-options"></div>
+        </div>
+        <button id="cancel-quiz-btn" class="btn-cancel">← Вернуться в трекер</button>
+    </section>
+
+    <section id="main-screen" class="grid-2 hidden">
+
+        <div class="col">
+            <div class="card">
+                <div class="grade-top">
+                    <div>
+                        <div class="label">Текущий грейд (Frontend)</div>
+                        <div class="grade-title" id="grade-name">Trainee</div>
+                    </div>
+                    <button class="btn-exam" id="open-exam-btn" disabled>🔒 Junior</button>
+                </div>
+                <div class="req-box" id="grade-reqs"></div>
+            </div>
+
+            <div class="stats-row">
+                <div class="card">
+                    <div class="card-header-row compact-header">
+                        <div class="label no-margin">Отработано</div>
+                        <button class="btn-link" id="open-sessions-btn">📅 Журнал</button>
+                    </div>
+                    <div class="stat-num" id="work-time">0 ч 0 мин</div>
+                </div>
+                <div class="card">
+                    <div class="label">Ставка в час (всё время)</div>
+                    <div class="stat-num rate-num" id="rate">0 ₽/ч</div>
+                </div>
+            </div>
+
+            <div class="card grow">
+                <div class="card-header-row compact-header">
+                    <div class="label no-margin">Заработано</div>
+                    <div class="period-switch" id="money-period-switch">
+                        <button class="period-btn" data-period="month">Месяц</button>
+                        <button class="period-btn" data-period="year">Год</button>
+                        <button class="period-btn active" data-period="all">Всё время</button>
+                    </div>
+                </div>
+                <div class="stat-num green money-main-num" id="money">0 ₽</div>
+
+                <div class="monthly-income-box">
+                    <div class="monthly-box-header">
+                        <span>Предыдущие 3 месяца</span>
+                        <button class="btn-link" id="open-months-btn">📅 Все месяцы</button>
+                    </div>
+                    <div class="monthly-list" id="recent-months-list"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col">
+            <div class="card timer-box">
+                <div class="timer-top-bar">
+                    <div class="timer-mode-switch">
+                        <label class="mode-option">
+                            <input type="radio" name="work-mode" value="commercial" checked>
+                            <span>💼 Коммерция</span>
+                        </label>
+                        <label class="mode-option">
+                            <input type="radio" name="work-mode" value="practice">
+                            <span>📚 Учеба / Пет</span>
+                        </label>
+                    </div>
+                    <button class="btn-link" id="open-manual-time-btn">+ Вручную</button>
+                </div>
+                <div class="timer-display" id="timer">00:00:00</div>
+                <div class="btn-group">
+                    <button id="start-btn">
+                        <svg class="ui-icon" viewBox="0 0 24 24" fill="currentColor"><polygon points="6 3 20 12 6 21 6 3"/></svg>
+                        Старт
+                    </button>
+                    <button id="pause-btn" class="btn-pause" disabled>
+                        <svg class="ui-icon" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></svg>
+                        Пауза
+                    </button>
+                    <button id="claim-btn" disabled>
+                        <svg class="ui-icon" viewBox="0 0 24 24" fill="currentColor"><rect x="5" y="5" width="14" height="14" rx="2"/></svg>
+                        Записать
+                    </button>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header-row">
+                    <h3>💰 Закрытые заказы и проекты</h3>
+                    <button class="btn-link" id="open-stats-btn">📊 Статистика (<span id="orders-count">0</span>)</button>
+                </div>
+                <div class="form-row">
+                    <input type="text" id="order-title" placeholder="Название">
+                    <div class="type-toggle" title="Проект засчитывается в прогресс грейда, мелкий заказ — только в кассу">
+                        <label class="type-btn">
+                            <input type="radio" name="order-type" value="order">
+                            <span>🛠️ Заказ</span>
+                        </label>
+                        <label class="type-btn">
+                            <input type="radio" name="order-type" value="project" checked>
+                            <span>🚀 Проект</span>
+                        </label>
+                    </div>
+                    <input type="number" id="order-amount" placeholder="Сумма ₽">
+                    <button class="btn-add" id="add-order-btn">+ Добавить</button>
+                </div>
+                <div id="order-type-hint" class="order-hint">
+                    🚀 <strong>Проект:</strong> полноценный сайт, лендинг или приложение под ключ. Идет в доход и засчитывается в прогресс грейда.
+                </div>
+
+                <div class="orders-list" id="order-history"></div>
+            </div>
+
+            <div class="card grow">
+                <div class="card-header-row">
+                    <h3>🏆 Последние достижения</h3>
+                    <button class="btn-link" id="open-achs-btn">🏅 Все (<span id="achs-count">0/32</span>)</button>
+                </div>
+                <div class="ach-list" id="ach-list"></div>
+            </div>
+        </div>
+    </section>
+</main>
+
+<footer class="app-footer">
+    <div class="footer-inner">
+        <span>💾 Данные сохраняются локально в вашем браузере. Регулярно скачивайте <strong>Бэкап</strong>, чтобы не потерять прогресс при смене устройства или очистке кэша.</span>
+        <button class="btn-link" id="footer-backup-btn">Скачать бэкап сейчас</button>
+    </div>
+</footer>
+
+<div id="stats-modal" class="modal-backdrop hidden">
+    <div class="modal-window">
+        <div class="modal-header">
+            <h3>📊 Вся статистика и история работ</h3>
+            <button class="btn-close-modal" data-close="stats-modal">✕</button>
+        </div>
+        <div class="modal-summary" id="modal-summary"></div>
+        <div class="modal-list" id="full-order-history"></div>
+    </div>
+</div>
+
+<div id="achs-modal" class="modal-backdrop hidden">
+    <div class="modal-window">
+        <div class="modal-header">
+            <h3>🏆 Все достижения (<span id="modal-achs-count">0/32</span>)</h3>
+            <button class="btn-close-modal" data-close="achs-modal">✕</button>
+        </div>
+        <div class="modal-ach-grid" id="full-ach-list"></div>
+    </div>
+</div>
+
+<div id="sessions-modal" class="modal-backdrop hidden">
+    <div class="modal-window">
+        <div class="modal-header">
+            <h3>📅 Журнал рабочих сессий по дням</h3>
+            <button class="btn-close-modal" data-close="sessions-modal">✕</button>
+        </div>
+        <div class="modal-summary" id="sessions-summary"></div>
+        <div class="modal-list" id="sessions-history-list"></div>
+    </div>
+</div>
+
+<div id="manual-time-modal" class="modal-backdrop hidden">
+    <div class="modal-window modal-narrow">
+        <div class="modal-header">
+            <h3>⏱ Записать время вручную</h3>
+            <button class="btn-close-modal" data-close="manual-time-modal">✕</button>
+        </div>
+        <div class="manual-form">
+            <div class="label">Тип активности</div>
+            <div class="timer-mode-switch modal-switch-gap">
+                <label class="mode-option">
+                    <input type="radio" name="manual-mode" value="commercial" checked>
+                    <span>💼 Коммерция</span>
+                </label>
+                <label class="mode-option">
+                    <input type="radio" name="manual-mode" value="practice">
+                    <span>📚 Учеба / Пет</span>
+                </label>
+            </div>
+            <div class="manual-inputs">
+                <div>
+                    <div class="label">Часы</div>
+                    <input type="number" id="manual-hours" min="0" max="24" value="1">
+                </div>
+                <div>
+                    <div class="label">Минуты</div>
+                    <input type="number" id="manual-mins" min="0" max="59" value="0">
+                </div>
+            </div>
+            <div class="label mt-12">Комментарий (необязательно)</div>
+            <input type="text" id="manual-note" placeholder="Напр. Верстка адаптива для клиента">
+            <button class="btn-add btn-full mt-16" id="save-manual-time-btn">+ Сохранить время</button>
+        </div>
+    </div>
+</div>
+
+<div id="roadmap-modal" class="modal-backdrop hidden">
+    <div class="modal-window">
+        <div class="modal-header">
+            <h3>🗺️ Карта навыков Frontend (<span id="roadmap-percent">0%</span>)</h3>
+            <button class="btn-close-modal" data-close="roadmap-modal">✕</button>
+        </div>
+        <div class="task-create-box">
+            <input type="text" id="rm-new-title" placeholder="Новая тема (например: RxJS потоки и операторы)">
+            <textarea id="rm-new-desc" rows="2" placeholder="Что именно нужно изучить или сделать на практике (необязательно)"></textarea>
+            <button class="btn-add btn-full" id="rm-add-btn">+ Добавить тему в карту</button>
+        </div>
+        <div class="modal-list" id="roadmap-list"></div>
+    </div>
+</div>
+
+<div id="tasks-modal" class="modal-backdrop hidden">
+    <div class="modal-window">
+        <div class="modal-header">
+            <h3>📝 Планировщик задач</h3>
+            <button class="btn-close-modal" data-close="tasks-modal">✕</button>
+        </div>
+        <div class="task-create-box">
+            <input type="text" id="task-new-title" placeholder="Название задачи (например: Сверстать блок отзывов)">
+            <textarea id="task-new-desc" rows="2" placeholder="Подробности или заметки (необязательно)"></textarea>
+            <button class="btn-add btn-full" id="task-add-btn">+ Добавить задачу</button>
+        </div>
+        <div class="modal-list" id="tasks-list"></div>
+    </div>
+</div>
+
+<div id="confirm-modal" class="modal-backdrop hidden">
+    <div class="modal-window modal-narrow">
+        <div class="modal-header">
+            <h3 id="confirm-title">⚠️ Подтверждение</h3>
+            <button class="btn-close-modal" data-close="confirm-modal">✕</button>
+        </div>
+        <p id="confirm-text" class="confirm-text"></p>
+        <div class="confirm-actions">
+            <button class="btn-ghost" data-close="confirm-modal">Отмена</button>
+            <button class="btn-danger" id="confirm-ok-btn">Удалить</button>
+        </div>
+    </div>
+</div>
+
+<div id="months-modal" class="modal-backdrop hidden">
+    <div class="modal-window modal-narrow">
+        <div class="modal-header">
+            <h3>📅 Доход по месяцам</h3>
+            <button class="btn-close-modal" data-close="months-modal">✕</button>
+        </div>
+        <div class="modal-list" id="all-months-list"></div>
+    </div>
+</div>
+
+<div id="toast-container" class="toast-container"></div>
+
+<script type="module" src="js/main.js"></script>
+</body>
+</html>
